@@ -8,6 +8,8 @@ export interface Noticia {
   dataPublicacao: string;
   slug: string;
   imagemPlaceholder: string;
+  engagementScore?: number; // Score de 0-100 baseado no potencial de engajamento
+  selected?: boolean; // Se a notícia está selecionada para publicação
 }
 
 export interface NoticiaData {
