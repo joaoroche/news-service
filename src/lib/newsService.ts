@@ -96,8 +96,7 @@ Retorne APENAS um objeto JSON válido no seguinte formato:
       "resumo": "Resumo de 2-3 linhas sobre a notícia",
       "categoria": "Política|Turismo|Infraestrutura|Segurança|Cultura|Economia|Educação|Saúde|Meio Ambiente|Esportes|Outros",
       "relevancia": "alta|média|baixa",
-      "fonte": "Nome da fonte",
-      "url": "URL da notícia se disponível",
+      "fonte": "Nome da fonte (ex: G1 Santos, A Tribuna, Prefeitura de Praia Grande)",
       "dataPublicacao": "2025-11-15",
       "engagementScore": 85
     }
@@ -115,6 +114,7 @@ REGRAS:
 3. Foque em notícias das últimas 24 horas
 4. Priorize fontes confiáveis (G1, Folha, Estadão, jornais locais)
 5. Inclua apenas notícias verificáveis com fontes reais
+6. IMPORTANTE: Para o campo "url", OMITA o campo ou use null se você não tiver acesso à URL real da notícia. NUNCA invente ou crie URLs fictícias.
 
 CÁLCULO DO ENGAGEMENT SCORE (0-100):
 - Avalie o potencial de cada notícia atrair e engajar leitores
