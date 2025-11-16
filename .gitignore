@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Generated output files (news service)
+output/test-*
+output/noticias-*.json
+output/relatorio-*.html
+output/NoticiasPraiaGrande-*.jsx
+output/noticias-data-*.ts
