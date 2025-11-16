@@ -100,7 +100,7 @@ export default function NewsCard({ noticia, isHeadline = false, rank, onSelectio
           </span>
         </div>
 
-        {noticia.url && (
+        {noticia.url ? (
           <a
             href={noticia.url}
             target="_blank"
@@ -109,6 +109,10 @@ export default function NewsCard({ noticia, isHeadline = false, rank, onSelectio
           >
             Ler notícia completa →
           </a>
+        ) : (
+          <div className="text-gray-500 text-sm italic">
+            Link da fonte não disponível
+          </div>
         )}
       </div>
     );
@@ -172,7 +176,7 @@ export default function NewsCard({ noticia, isHeadline = false, rank, onSelectio
             <span>{new Date(noticia.dataPublicacao).toLocaleDateString('pt-BR')}</span>
           </div>
 
-          {noticia.url && (
+          {noticia.url ? (
             <a
               href={noticia.url}
               target="_blank"
@@ -181,6 +185,10 @@ export default function NewsCard({ noticia, isHeadline = false, rank, onSelectio
             >
               Ler mais →
             </a>
+          ) : (
+            <div className="mt-4 text-gray-400 text-xs italic">
+              Link não disponível
+            </div>
           )}
         </div>
       </div>
