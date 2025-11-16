@@ -73,6 +73,25 @@ export default function HomePage() {
     setPublishSuccess(false);
   };
 
+  const selectAll = () => {
+    if (!newsData) return;
+    const updatedNews = { ...newsData };
+    updatedNews.conteudo.noticias = updatedNews.conteudo.noticias.map(n => ({ ...n, selected: true }));
+    setNewsData(updatedNews);
+  };
+
+  const deselectAll = () => {
+    if (!newsData) return;
+    const updatedNews = { ...newsData };
+    updatedNews.conteudo.noticias = updatedNews.conteudo.noticias.map(n => ({ ...n, selected: false }));
+    setNewsData(updatedNews);
+  };
+
+  const getSelectedCount = () => {
+    if (!newsData) return 0;
+    return newsData.conteudo.noticias.filter(n => n.selected).length;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
@@ -142,6 +161,9 @@ export default function HomePage() {
                 <p className="text-gray-600">
                   Total de {newsData.metadata.totalNoticias} notícias encontradas
                 </p>
+                <p className="text-blue-600 font-semibold">
+                  {getSelectedCount()} notícias selecionadas para publicação
+                </p>
                 <p className="text-gray-500 text-sm">
                   Coletado em: {new Date(newsData.metadata.dataColeta).toLocaleString('pt-BR')}
                 </p>
@@ -156,7 +178,7 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={publishNews}
-                  disabled={publishing}
+                  disabled={publishing || getSelectedCount() === 0}
                   className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {publishing ? (
@@ -165,7 +187,7 @@ export default function HomePage() {
                       Publicando...
                     </>
                   ) : (
-                    <>✓ Aprovar e Publicar</>
+                    <>✓ Publicar Selecionadas ({getSelectedCount()})</>
                   )}
                 </button>
               </div>
@@ -184,13 +206,38 @@ export default function HomePage() {
 
                 {/* Lista de Notícias */}
                 <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    📋 Todas as Notícias
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      📋 Ranking de Notícias por Potencial de Engajamento
+                    </h2>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={selectAll}
+                        className="bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+                      >
+                        ✓ Selecionar Todas
+                      </button>
+                      <button
+                        onClick={deselectAll}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+                      >
+                        ✗ Desmarcar Todas
+                      </button>
+                    </div>
+                  </div>
 
                   <div className="space-y-6">
                     {newsData.conteudo.noticias.map((noticia, index) => (
-                      <NewsCard key={index} noticia={noticia} />
+                      <NewsCard
+                        key={index}
+                        noticia={noticia}
+                        rank={index + 1}
+                        onSelectionChange={(selected) => {
+                          const updatedNews = { ...newsData };
+                          updatedNews.conteudo.noticias[index].selected = selected;
+                          setNewsData(updatedNews);
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
@@ -248,6 +295,32 @@ export default function HomePage() {
                           {newsData.metadata.totalNoticias}
                         </span>
                       </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 text-sm">Selecionadas:</span>
+                        <span className="font-bold text-green-600">
+                          {getSelectedCount()}
+                        </span>
+                      </div>
+                      <hr className="border-gray-300" />
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 text-sm">🔥 Alto engajamento:</span>
+                        <span className="font-bold text-green-600">
+                          {newsData.conteudo.noticias.filter(n => (n.engagementScore || 0) >= 80).length}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 text-sm">⭐ Médio engajamento:</span>
+                        <span className="font-bold text-yellow-600">
+                          {newsData.conteudo.noticias.filter(n => (n.engagementScore || 0) >= 50 && (n.engagementScore || 0) < 80).length}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 text-sm">📌 Baixo engajamento:</span>
+                        <span className="font-bold text-gray-600">
+                          {newsData.conteudo.noticias.filter(n => (n.engagementScore || 0) < 50).length}
+                        </span>
+                      </div>
+                      <hr className="border-gray-300" />
                       <div className="flex justify-between items-center">
                         <span className="text-gray-700 text-sm">Alta relevância:</span>
                         <span className="font-bold text-red-600">

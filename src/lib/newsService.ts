@@ -8,6 +8,7 @@ interface Noticia {
   fonte: string;
   url?: string;
   dataPublicacao: string;
+  engagementScore?: number;
 }
 
 interface NoticiaRawData {
@@ -93,11 +94,12 @@ Retorne APENAS um objeto JSON válido no seguinte formato:
     {
       "titulo": "Título da notícia",
       "resumo": "Resumo de 2-3 linhas sobre a notícia",
-      "categoria": "Política|Turismo|Infraestrutura|Segurança|Cultura|Economia|Outros",
+      "categoria": "Política|Turismo|Infraestrutura|Segurança|Cultura|Economia|Educação|Saúde|Meio Ambiente|Esportes|Outros",
       "relevancia": "alta|média|baixa",
       "fonte": "Nome da fonte",
       "url": "URL da notícia se disponível",
-      "dataPublicacao": "2025-11-15"
+      "dataPublicacao": "2025-11-15",
+      "engagementScore": 85
     }
   ],
   "temasEmDestaque": ["tema1", "tema2", "tema3"],
@@ -112,7 +114,19 @@ REGRAS:
 2. Retorne SOMENTE JSON válido
 3. Foque em notícias das últimas 24 horas
 4. Priorize fontes confiáveis (G1, Folha, Estadão, jornais locais)
-5. Inclua apenas notícias verificáveis com fontes reais`
+5. Inclua apenas notícias verificáveis com fontes reais
+
+CÁLCULO DO ENGAGEMENT SCORE (0-100):
+- Avalie o potencial de cada notícia atrair e engajar leitores
+- Considere fatores como:
+  * Impacto na comunidade local (30 pontos)
+  * Originalidade e novidade do tema (25 pontos)
+  * Relevância emocional/apelo humano (20 pontos)
+  * Potencial de discussão/compartilhamento (15 pontos)
+  * Urgência/atualidade do tema (10 pontos)
+- Exemplos de alto engajamento (80-100): Inaugurações importantes, eventos culturais grandes, questões de segurança, mudanças que afetam muitos moradores
+- Exemplos de médio engajamento (50-79): Notícias administrativas, obras em andamento, eventos de médio porte
+- Exemplos de baixo engajamento (0-49): Notícias muito técnicas, rotineiras ou de nicho específico`
             }
           ]
         },
@@ -157,6 +171,13 @@ REGRAS:
    * @returns Dados formatados
    */
   private formatForBlog(newsData: NoticiaRawData, previewMode = false): FormattedData {
+    // Ordena notícias por engagement score (maior para menor)
+    const sortedNoticias = [...newsData.noticias].sort((a, b) => {
+      const scoreA = a.engagementScore || 0;
+      const scoreB = b.engagementScore || 0;
+      return scoreB - scoreA;
+    });
+
     const formattedData: FormattedData = {
       metadata: {
         dataColeta: newsData.dataColeta || new Date().toISOString(),
@@ -165,11 +186,12 @@ REGRAS:
         estado: 'São Paulo'
       },
       conteudo: {
-        manchetePrincipal: this.getManchete(newsData.noticias),
-        noticias: newsData.noticias.map(noticia => ({
+        manchetePrincipal: this.getManchete(sortedNoticias),
+        noticias: sortedNoticias.map(noticia => ({
           ...noticia,
           slug: this.generateSlug(noticia.titulo),
-          imagemPlaceholder: this.getImagemPorCategoria(noticia.categoria)
+          imagemPlaceholder: this.getImagemPorCategoria(noticia.categoria),
+          selected: true // Por padrão, todas as notícias vêm selecionadas
         })),
         sidebar: {
           temasEmDestaque: newsData.temasEmDestaque || [],
@@ -178,7 +200,7 @@ REGRAS:
       },
       seo: {
         title: `Notícias de Praia Grande - ${new Date().toLocaleDateString('pt-BR')}`,
-        description: this.generateMetaDescription(newsData.noticias),
+        description: this.generateMetaDescription(sortedNoticias),
         keywords: this.generateKeywords(newsData.temasEmDestaque)
       }
     };

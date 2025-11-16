@@ -36,18 +36,29 @@ export async function POST(request: NextRequest) {
     // Gera timestamp para os arquivos
     const timestamp = new Date().toISOString().split('T')[0];
 
-    // Re-formata os dados para incluir o componente Next.js
+    // Filtra apenas as notícias selecionadas
+    const selectedNoticias = newsData.conteudo.noticias.filter((n: any) => n.selected !== false);
+
+    if (selectedNoticias.length === 0) {
+      return NextResponse.json(
+        { error: 'Nenhuma notícia selecionada para publicação' },
+        { status: 400 }
+      );
+    }
+
+    // Re-formata os dados para incluir o componente Next.js (apenas notícias selecionadas)
     const formattedData = service.formatForBlog({
       dataColeta: newsData.metadata.dataColeta,
-      totalNoticias: newsData.metadata.totalNoticias,
-      noticias: newsData.conteudo.noticias.map((n: any) => ({
+      totalNoticias: selectedNoticias.length,
+      noticias: selectedNoticias.map((n: any) => ({
         titulo: n.titulo,
         resumo: n.resumo,
         categoria: n.categoria,
         relevancia: n.relevancia,
         fonte: n.fonte,
         url: n.url,
-        dataPublicacao: n.dataPublicacao
+        dataPublicacao: n.dataPublicacao,
+        engagementScore: n.engagementScore
       })),
       temasEmDestaque: newsData.conteudo.sidebar.temasEmDestaque,
       sugestoesPautas: newsData.conteudo.sidebar.sugestoesPautas
@@ -72,14 +83,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Notícias publicadas com sucesso',
+      message: `${selectedNoticias.length} notícia(s) selecionada(s) publicada(s) com sucesso`,
       files: {
         json: `noticias-${timestamp}.json`,
         html: `relatorio-${timestamp}.html`,
         component: `NoticiasPraiaGrande-${timestamp}.jsx`,
         data: `noticias-data-${timestamp}.ts`
       },
-      totalNoticias: newsData.metadata.totalNoticias,
+      totalNoticias: selectedNoticias.length,
       timestamp: new Date().toISOString()
     });
 
